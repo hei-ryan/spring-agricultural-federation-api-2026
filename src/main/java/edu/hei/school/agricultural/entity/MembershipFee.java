@@ -16,4 +16,5 @@ public class MembershipFee {
     private LocalDate eligibleFrom;
     private Frequency frequency;
     private Double amount;
+    private Collectivity collectivityOwner;
 }

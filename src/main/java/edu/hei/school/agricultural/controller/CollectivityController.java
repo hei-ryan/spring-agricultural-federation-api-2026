@@ -2,9 +2,12 @@ package edu.hei.school.agricultural.controller;
 
 import edu.hei.school.agricultural.controller.dto.CollectivityInformation;
 import edu.hei.school.agricultural.controller.dto.CreateCollectivity;
+import edu.hei.school.agricultural.controller.dto.CreateMembershipFee;
 import edu.hei.school.agricultural.controller.mapper.CollectivityDtoMapper;
 import edu.hei.school.agricultural.controller.mapper.MembershipFeeDtoMapper;
 import edu.hei.school.agricultural.entity.Collectivity;
+import edu.hei.school.agricultural.entity.Frequency;
+import edu.hei.school.agricultural.entity.MembershipFee;
 import edu.hei.school.agricultural.exception.BadRequestException;
 import edu.hei.school.agricultural.exception.NotFoundException;
 import edu.hei.school.agricultural.service.CollectivityService;
@@ -103,4 +106,30 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
+    @PostMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> createCollectivityMembershipFee(
+            @PathVariable String id,
+            @RequestBody List<CreateMembershipFee> membershipFees) {
+        try {
+            List<MembershipFee> membershipFeesToCreate = membershipFees.stream()
+                    .map(membershipFeeDtoMapper::mapToEntity)
+                    .toList();
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.createMembershipFees(id, membershipFeesToCreate).stream()
+                            .map(membershipFeeDtoMapper::mapToDto)
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+
 }

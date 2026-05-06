@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static edu.hei.school.agricultural.entity.ActivityStatus.ACTIVE;
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -53,5 +54,17 @@ public class CollectivityService {
                         new NotFoundException("Collectivity.id= " + collectivityIdentifier + " not found"));
 
         return membershipFeeRepository.getMembershipFeesByCollectivityId(collectivity.getId());
+    }
+
+    public List<MembershipFee> createMembershipFees(String collectivityIdentifier, List<MembershipFee> membershipFees) {
+        Collectivity collectivity = collectivityRepository.findById(collectivityIdentifier)
+                .orElseThrow(() ->
+                        new NotFoundException("Collectivity.id= " + collectivityIdentifier + " not found"));
+        for (MembershipFee membershipFee : membershipFees) {
+            membershipFee.setId(randomUUID().toString());
+            membershipFee.setStatus(ACTIVE);
+            membershipFee.setCollectivityOwner(collectivity);
+        }
+        return membershipFeeRepository.saveAll(membershipFees);
     }
 }
