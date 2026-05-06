@@ -3,6 +3,7 @@ package edu.hei.school.agricultural.controller;
 import edu.hei.school.agricultural.controller.dto.CollectivityInformation;
 import edu.hei.school.agricultural.controller.dto.CreateCollectivity;
 import edu.hei.school.agricultural.controller.mapper.CollectivityDtoMapper;
+import edu.hei.school.agricultural.controller.mapper.MembershipFeeDtoMapper;
 import edu.hei.school.agricultural.entity.Collectivity;
 import edu.hei.school.agricultural.exception.BadRequestException;
 import edu.hei.school.agricultural.exception.NotFoundException;
@@ -20,6 +21,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class CollectivityController {
     private final CollectivityDtoMapper collectivityDtoMapper;
+    private final MembershipFeeDtoMapper membershipFeeDtoMapper;
     private final CollectivityService collectivityService;
 
     @GetMapping("/collectivities/{id}")
@@ -71,6 +73,25 @@ public class CollectivityController {
         try {
             return ResponseEntity.status(OK)
                     .body(collectivityDtoMapper.mapToDto(collectivityService.updateInformations(id, name, number)));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> getCollectivityMembershipFeesByCollectivity(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.getMembershipFeesByCollectivityIdentifier(id).stream()
+                            .map(membershipFeeDtoMapper::mapToDto)
+                            .toList());
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST)
                     .body(e.getMessage());

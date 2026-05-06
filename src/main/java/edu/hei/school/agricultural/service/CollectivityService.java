@@ -1,9 +1,11 @@
 package edu.hei.school.agricultural.service;
 
 import edu.hei.school.agricultural.entity.Collectivity;
+import edu.hei.school.agricultural.entity.MembershipFee;
 import edu.hei.school.agricultural.exception.BadRequestException;
 import edu.hei.school.agricultural.exception.NotFoundException;
 import edu.hei.school.agricultural.repository.CollectivityRepository;
+import edu.hei.school.agricultural.repository.MembershipFeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import static java.util.UUID.randomUUID;
 @RequiredArgsConstructor
 public class CollectivityService {
     private final CollectivityRepository collectivityRepository;
+    private final MembershipFeeRepository membershipFeeRepository;
 
     public List<Collectivity> createCollectivities(List<Collectivity> collectivities) {
         for (Collectivity collectivity : collectivities) {
@@ -42,5 +45,13 @@ public class CollectivityService {
         collectivity.setName(actualName);
         collectivity.setNumber(actualNumber);
         return collectivityRepository.saveAll(List.of((collectivity))).getFirst();
+    }
+
+    public List<MembershipFee> getMembershipFeesByCollectivityIdentifier(String collectivityIdentifier) {
+        Collectivity collectivity = collectivityRepository.findById(collectivityIdentifier)
+                .orElseThrow(() ->
+                        new NotFoundException("Collectivity.id= " + collectivityIdentifier + " not found"));
+
+        return membershipFeeRepository.getMembershipFeesByCollectivityId(collectivity.getId());
     }
 }
