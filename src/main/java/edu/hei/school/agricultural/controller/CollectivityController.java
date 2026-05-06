@@ -4,9 +4,9 @@ import edu.hei.school.agricultural.controller.dto.CollectivityInformation;
 import edu.hei.school.agricultural.controller.dto.CreateCollectivity;
 import edu.hei.school.agricultural.controller.dto.CreateMembershipFee;
 import edu.hei.school.agricultural.controller.mapper.CollectivityDtoMapper;
+import edu.hei.school.agricultural.controller.mapper.FinancialAccountDtoMapper;
 import edu.hei.school.agricultural.controller.mapper.MembershipFeeDtoMapper;
 import edu.hei.school.agricultural.entity.Collectivity;
-import edu.hei.school.agricultural.entity.Frequency;
 import edu.hei.school.agricultural.entity.MembershipFee;
 import edu.hei.school.agricultural.exception.BadRequestException;
 import edu.hei.school.agricultural.exception.NotFoundException;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
@@ -26,6 +27,7 @@ public class CollectivityController {
     private final CollectivityDtoMapper collectivityDtoMapper;
     private final MembershipFeeDtoMapper membershipFeeDtoMapper;
     private final CollectivityService collectivityService;
+    private final FinancialAccountDtoMapper financialAccountDtoMapper;
 
     @GetMapping("/collectivities/{id}")
     public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
@@ -131,5 +133,23 @@ public class CollectivityController {
         }
     }
 
-
+    @GetMapping("/collectivities/{id}/financialAccounts")
+    public ResponseEntity<?> getCollectivityFinancialAccounts(@PathVariable String id,
+                                                              @RequestParam(required = false) LocalDate at) {
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.getFinancialAccounts(id).stream()
+                            .map(financialAccount -> financialAccountDtoMapper.mapToDto(financialAccount, at))
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
 }
