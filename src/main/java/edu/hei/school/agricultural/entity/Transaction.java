@@ -5,15 +5,18 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
-@Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@Getter
+@Setter
+@ToString(exclude = "accountCredited")
+@EqualsAndHashCode(exclude = "accountCredited")
 public class Transaction {
     private String id;
     private TransactionType type;
     private Double amount;
     private LocalDate creationDate;
     private Member memberDebited;
+    private FinancialAccount accountCredited;
 }

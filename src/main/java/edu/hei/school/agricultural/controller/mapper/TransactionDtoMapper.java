@@ -19,7 +19,7 @@ public class TransactionDtoMapper {
                 .amount(collectivityTransaction.getAmount())
                 .creationDate(collectivityTransaction.getCreationDate())
                 .paymentMode(collectivityTransaction.getPaymentMode() == null ? null : PaymentMode.valueOf(collectivityTransaction.getPaymentMode().name()))
-                .accountCredited(financialAccountDtoMapper.mapToDto(collectivityTransaction.getAccountCredited(), now()))
+                .accountCredited(financialAccountDtoMapper.mapToDto(collectivityTransaction.getAccountCredited()))
                 .memberDebited(memberDtoMapper.mapToDto(collectivityTransaction.getMemberDebited()))
                 .build();
     }

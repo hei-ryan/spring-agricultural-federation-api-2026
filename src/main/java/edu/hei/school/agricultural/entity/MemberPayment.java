@@ -1,10 +1,6 @@
-package edu.hei.school.agricultural.controller.dto;
+package edu.hei.school.agricultural.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -16,7 +12,9 @@ import java.time.LocalDate;
 public class MemberPayment {
     private String id;
     private Double amount;
+    private MembershipFee membershipFee;
     private PaymentMode paymentMode;
     private FinancialAccount accountCredited;
+    private Member memberOwner;
     private LocalDate creationDate;
 }

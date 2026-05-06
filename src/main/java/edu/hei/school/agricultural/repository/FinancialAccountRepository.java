@@ -21,6 +21,23 @@ public class FinancialAccountRepository {
     private final FinancialAccountMapper financialAccountMapper;
     private final MemberRepository memberRepository;
 
+    public Optional<FinancialAccount> findFinancialAccountById(String financialAccountId) {
+        Optional<CashAccount> optionalCashAccount = findCashAccountById(financialAccountId);
+        if (optionalCashAccount.isPresent()) {
+            return Optional.of(optionalCashAccount.get());
+        } else {
+            Optional<BankAccount> optionalBankAccount = findBankAccountById(financialAccountId);
+            if (optionalBankAccount.isPresent()) {
+                return Optional.of(optionalBankAccount.get());
+            }
+            Optional<MobileBankingAccount> optionalMobileBankingAccount = findMobileBankingAccountById(financialAccountId);
+            if (optionalMobileBankingAccount.isPresent()) {
+                return Optional.of(optionalMobileBankingAccount.get());
+            }
+        }
+        return Optional.empty();
+    }
+
     public List<BankAccount> getBankAccountsByCollectivityId(String collectivityId) {
         List<BankAccount> bankAccounts = new ArrayList<BankAccount>();
         try (PreparedStatement preparedStatement = connection.prepareStatement("""
@@ -92,6 +109,60 @@ public class FinancialAccountRepository {
                 transactions.add(transaction);
             }
             return transactions;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Optional<CashAccount> findCashAccountById(String id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                select id from "cash_account" where id = ?
+                """)) {
+            preparedStatement.setString(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                CashAccount cashAccount = financialAccountMapper.mapCashFromResultSet(resultSet);
+                List<Transaction> transactionList = getTransactionsByFinancialAccountId(cashAccount.getId());
+                cashAccount.addTransactions(transactionList);
+                return Optional.of(cashAccount);
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Optional<BankAccount> findBankAccountById(String id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                select id, holder_name, bank_name, bank_code, branch_code, account_number, key from "bank_account" where id = ?
+                """)) {
+            preparedStatement.setString(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                BankAccount account = financialAccountMapper.mapBankFromResultSet(resultSet);
+                List<Transaction> transactionList = getTransactionsByFinancialAccountId(account.getId());
+                account.addTransactions(transactionList);
+                return Optional.of(account);
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Optional<MobileBankingAccount> findMobileBankingAccountById(String id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                select id, holder_name, service, mobile_number from "mobile_banking_account" where id = ?
+                """)) {
+            preparedStatement.setString(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                MobileBankingAccount account = financialAccountMapper.mapMobileBankingFromResultSet(resultSet);
+                List<Transaction> transactionList = getTransactionsByFinancialAccountId(account.getId());
+                account.addTransactions(transactionList);
+                return Optional.of(account);
+            }
+            return Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
