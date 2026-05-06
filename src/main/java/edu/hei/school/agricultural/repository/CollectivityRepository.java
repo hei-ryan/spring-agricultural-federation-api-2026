@@ -6,10 +6,7 @@ import edu.hei.school.agricultural.mapper.CollectivityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,19 +22,24 @@ public class CollectivityRepository {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 """
                         insert into "collectivity" (id, name, number, location, president_id, vice_president_id, treasurer_id, secretary_id) 
-                        values (?, ?, ?, ? ?, ?, ?, ?, ?) 
-                        on conflict (id) do update set name = excluded.name  
-                                                                        and number = excluded.number 
-                                                                        and location = excluded.location 
-                                                                        and president_id = excluded.president_id 
-                                                                        and treasurer_id = excluded.treasurer_id 
-                                                                        and secretary_id = excluded.secretary_id 
+                        values (?, ?, ?, ?, ?, ?, ?, ?) 
+                        on conflict (id) do update set name = excluded.name,
+                                                       number = excluded.number,
+                                                       location = excluded.location,
+                                                       president_id = excluded.president_id,
+                                                       treasurer_id = excluded.treasurer_id,
+                                                       secretary_id = excluded.secretary_id 
                         """)) {
             for (Collectivity collectivity : collectivities) {
                 CollectivityStructure collectivityStructure = collectivity.getCollectivityStructure();
                 preparedStatement.setString(1, collectivity.getId());
                 preparedStatement.setString(2, collectivity.getName());
-                preparedStatement.setInt(3, collectivity.getNumber());
+                Integer number = collectivity.getNumber();
+                if (number == null) {
+                    preparedStatement.setNull(3, Types.INTEGER);
+                } else {
+                    preparedStatement.setInt(3, number);
+                }
                 preparedStatement.setObject(4, collectivity.getLocation());
                 preparedStatement.setString(5, collectivityStructure.getPresident().getId());
                 preparedStatement.setString(6, collectivityStructure.getVicePresident().getId());
@@ -55,6 +57,40 @@ public class CollectivityRepository {
         return memberList;
     }
 
+
+    public boolean isNumberExists(Integer number) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                select id
+                from "collectivity"
+                where number = ?
+                """)) {
+            preparedStatement.setInt(1, number);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    public boolean isNameExists(String name) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                select id
+                from "collectivity"
+                where name = ?
+                """)) {
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
 
     public Optional<Collectivity> findById(String id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("""

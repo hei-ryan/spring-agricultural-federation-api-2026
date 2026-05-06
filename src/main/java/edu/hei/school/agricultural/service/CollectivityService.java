@@ -27,6 +27,20 @@ public class CollectivityService {
     }
 
     public Collectivity getCollectivityById(String id) {
-       return collectivityRepository.findById(id).orElseThrow(() -> new NotFoundException("Collectivity.id= " + id + " not found"));
+        return collectivityRepository.findById(id).orElseThrow(() -> new NotFoundException("Collectivity.id= " + id + " not found"));
+    }
+
+    public Collectivity updateInformations(String collectivityId, String actualName, Integer actualNumber) {
+        Collectivity collectivity = collectivityRepository.findById(collectivityId)
+                .orElseThrow(() -> new NotFoundException("Collectivity.id= " + collectivityId + " not found"));
+        if (actualNumber != null && collectivityRepository.isNumberExists(actualNumber)) {
+            throw new BadRequestException("Collectivity.number=" + actualNumber + " already exists");
+        }
+        if (actualName != null && collectivityRepository.isNameExists(actualName)) {
+            throw new BadRequestException("Collectivity.name=" + actualName + " already exists");
+        }
+        collectivity.setName(actualName);
+        collectivity.setNumber(actualNumber);
+        return collectivityRepository.saveAll(List.of((collectivity))).getFirst();
     }
 }
