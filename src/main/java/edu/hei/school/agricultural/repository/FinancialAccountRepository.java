@@ -1,9 +1,6 @@
 package edu.hei.school.agricultural.repository;
 
-import edu.hei.school.agricultural.entity.BankAccount;
-import edu.hei.school.agricultural.entity.CashAccount;
-import edu.hei.school.agricultural.entity.MobileBankingAccount;
-import edu.hei.school.agricultural.entity.Transaction;
+import edu.hei.school.agricultural.entity.*;
 import edu.hei.school.agricultural.exception.InternalServerErrorException;
 import edu.hei.school.agricultural.mapper.FinancialAccountMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class FinancialAccountRepository {
     private final Connection connection;
     private final FinancialAccountMapper financialAccountMapper;
+    private final MemberRepository memberRepository;
 
     public List<BankAccount> getBankAccountsByCollectivityId(String collectivityId) {
         List<BankAccount> bankAccounts = new ArrayList<BankAccount>();
@@ -82,14 +81,14 @@ public class FinancialAccountRepository {
         List<Transaction> transactions = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 """
-                        select id, amount, creation_date, transaction_type from "transaction" where financial_account_id = ?
+                        select id, amount, creation_date, transaction_type, member_debited_id from "transaction" where financial_account_id = ?
                         """
         )) {
             preparedStatement.setString(1, financialAccountId);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                Transaction transaction = financialAccountMapper.mapTransactionFromResultSet(resultSet);
-
+                Member memberDebited = memberRepository.findById(resultSet.getString("member_debited_id")).orElseThrow();
+                Transaction transaction = financialAccountMapper.mapTransactionFromResultSet(resultSet, memberDebited);
                 transactions.add(transaction);
             }
             return transactions;

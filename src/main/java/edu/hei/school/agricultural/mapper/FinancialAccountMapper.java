@@ -34,12 +34,13 @@ public class FinancialAccountMapper {
                 .build();
     }
 
-    public Transaction mapTransactionFromResultSet(ResultSet resultSet) throws SQLException {
+    public Transaction mapTransactionFromResultSet(ResultSet resultSet, Member member) throws SQLException {
         return Transaction.builder()
                 .id(resultSet.getString("id"))
                 .amount(resultSet.getDouble("amount"))
                 .creationDate(resultSet.getDate("creation_date").toLocalDate())
                 .type(TransactionType.valueOf(resultSet.getString("transaction_type")))
+                .memberDebited(member)
                 .build();
     }
 }

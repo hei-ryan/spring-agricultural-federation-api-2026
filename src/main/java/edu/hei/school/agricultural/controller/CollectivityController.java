@@ -6,6 +6,7 @@ import edu.hei.school.agricultural.controller.dto.CreateMembershipFee;
 import edu.hei.school.agricultural.controller.mapper.CollectivityDtoMapper;
 import edu.hei.school.agricultural.controller.mapper.FinancialAccountDtoMapper;
 import edu.hei.school.agricultural.controller.mapper.MembershipFeeDtoMapper;
+import edu.hei.school.agricultural.controller.mapper.TransactionDtoMapper;
 import edu.hei.school.agricultural.entity.Collectivity;
 import edu.hei.school.agricultural.entity.MembershipFee;
 import edu.hei.school.agricultural.exception.BadRequestException;
@@ -28,6 +29,7 @@ public class CollectivityController {
     private final MembershipFeeDtoMapper membershipFeeDtoMapper;
     private final CollectivityService collectivityService;
     private final FinancialAccountDtoMapper financialAccountDtoMapper;
+    private final TransactionDtoMapper transactionDtoMapper;
 
     @GetMapping("/collectivities/{id}")
     public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
@@ -140,6 +142,25 @@ public class CollectivityController {
             return ResponseEntity.status(OK)
                     .body(collectivityService.getFinancialAccounts(id).stream()
                             .map(financialAccount -> financialAccountDtoMapper.mapToDto(financialAccount, at))
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/collectivities/{id}/transactions")
+    public ResponseEntity<?> getCollectivityTransactions(@PathVariable String id, @RequestParam LocalDate from, @RequestParam LocalDate to) {
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.getTransactionsByCollectivity(id, from, to).stream()
+                            .map(transactionDtoMapper::mapToDto)
                             .toList());
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST)

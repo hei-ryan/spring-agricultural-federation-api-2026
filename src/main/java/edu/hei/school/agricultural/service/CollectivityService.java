@@ -9,10 +9,12 @@ import edu.hei.school.agricultural.repository.MembershipFeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static edu.hei.school.agricultural.entity.ActivityStatus.ACTIVE;
+import static edu.hei.school.agricultural.entity.PaymentMode.*;
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -85,5 +87,46 @@ public class CollectivityService {
                         bankAccounts.stream()),
                 mobileBankingAccountsByCollectivityId.stream()
         ).toList();
+    }
+
+    public List<CollectivityTransaction> getTransactionsByCollectivity(String collectivityIdentifier, LocalDate from, LocalDate to) {
+        List<FinancialAccount> financialAccounts = getFinancialAccounts(collectivityIdentifier);
+
+        return financialAccounts.stream()
+                .map(financialAccount -> {
+                    var transactionList = financialAccount.getTransactions().stream()
+                            .filter(transaction -> (transaction.getCreationDate().isAfter(from) || transaction.getCreationDate().equals(from))
+                                    && (transaction.getCreationDate().isBefore(to) || transaction.getCreationDate().equals(to)))
+                            .toList();
+                    var paymentMode = getPaymentMode(financialAccount);
+                    return transactionList.stream()
+                            .map(transaction -> {
+                                CollectivityTransaction collectivityTransaction = CollectivityTransaction.builder()
+                                        .id(transaction.getId())
+                                        .type(transaction.getType())
+                                        .amount(transaction.getAmount())
+                                        .creationDate(transaction.getCreationDate())
+                                        .accountCredited(financialAccount)
+                                        .paymentMode(paymentMode)
+                                        .memberDebited(transaction.getMemberDebited())
+                                        .build();
+                                return collectivityTransaction;
+                            })
+                            .toList();
+                })
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    private PaymentMode getPaymentMode(FinancialAccount financialAccount) {
+        PaymentMode paymentMode;
+        paymentMode = switch (financialAccount) {
+            case BankAccount ignored -> BANK_TRANSFER;
+            case MobileBankingAccount ignored -> MOBILE_BANKING;
+            case CashAccount ignored -> CASH;
+            default ->
+                    throw new IllegalArgumentException("Unknown financial account type " + financialAccount.getClass().getTypeName());
+        };
+        return paymentMode;
     }
 }
