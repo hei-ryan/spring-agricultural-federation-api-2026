@@ -3,10 +3,12 @@ package edu.hei.school.agricultural.api;
 import edu.hei.school.agricultural.api.model.*;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 public class ApiClient {
@@ -16,7 +18,21 @@ public class ApiClient {
 
     public ApiClient() {
         this.baseUrl = BASE_URL;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = getRestTemplate();
+    }
+
+    private RestTemplate getRestTemplate() {
+        var template = new RestTemplate();
+        template.setInterceptors(Collections.singletonList(apiKeyInterceptor()));
+        return template;
+    }
+
+    private ClientHttpRequestInterceptor apiKeyInterceptor() {
+        return (request, body, execution) -> {
+            String key = "agri-secure-key";
+            request.getHeaders().set("x-api-key", key);
+            return execution.execute(request, body);
+        };
     }
 
     // =========================
@@ -24,7 +40,8 @@ public class ApiClient {
     // =========================
 
     public List<Collectivity> createCollectivities(List<CreateCollectivity> body) {
-        return post("/collectivities", body, new ParameterizedTypeReference<>() {});
+        return post("/collectivities", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     public Collectivity getCollectivity(String id) {
@@ -36,47 +53,58 @@ public class ApiClient {
     }
 
     public List<FinancialAccount> getCollectivityFinancialAccounts(String id) {
-        return get("/collectivities/" + id + "/financialAccounts", new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/financialAccounts", new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<FinancialAccount> getCollectivityFinancialAccountsAt(String id, LocalDate at) {
-        return get("/collectivities/" + id + "/financialAccounts?at=" + at, new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/financialAccounts?at=" + at, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<MembershipFee> getCollectivityMembershipFees(String id) {
-        return get("/collectivities/" + id + "/membershipFees", new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/membershipFees", new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<MembershipFee> createCollectivityMembershipFees(String id, List<CreateMembershipFee> body) {
-        return post("/collectivities/" + id + "/membershipFees", body, new ParameterizedTypeReference<>() {});
+        return post("/collectivities/" + id + "/membershipFees", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<CollectivityTransaction> getCollectivityTransactions(String id, LocalDate from, LocalDate to) {
-        return get("/collectivities/" + id + "/transactions?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/transactions?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<CollectivityLocalStatistics> getCollectivityStatistics(String id, LocalDate from, LocalDate to) {
-        return get("/collectivities/" + id + "/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<CollectivityOverallStatistics> getCollectivitiesOverallStatistics(LocalDate from, LocalDate to) {
-        return get("/collectivities/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {});
+        return get("/collectivities/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<CollectivityActivity> getCollectivityActivities(String id) {
-        return get("/collectivities/" + id + "/activities", new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + id + "/activities", new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<CollectivityActivity> createCollectivityActivities(String id, List<CreateCollectivityActivity> body) {
-        return post("/collectivities/" + id + "/activities", body, new ParameterizedTypeReference<>() {});
+        return post("/collectivities/" + id + "/activities", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<ActivityMemberAttendance> createActivityAttendance(String collectivityId, String activityId, List<CreateActivityMemberAttendance> body) {
-        return post("/collectivities/" + collectivityId + "/activities/" + activityId + "/attendance", body, new ParameterizedTypeReference<>() {});
+        return post("/collectivities/" + collectivityId + "/activities/" + activityId + "/attendance", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<ActivityMemberAttendance> getActivityAttendance(String collectivityId, String activityId) {
-        return get("/collectivities/" + collectivityId + "/activities/" + activityId + "/attendance", new ParameterizedTypeReference<>() {});
+        return get("/collectivities/" + collectivityId + "/activities/" + activityId + "/attendance", new ParameterizedTypeReference<>() {
+        });
     }
 
     // =========================
@@ -84,11 +112,13 @@ public class ApiClient {
     // =========================
 
     public List<Member> createMembers(List<CreateMember> body) {
-        return post("/members", body, new ParameterizedTypeReference<>() {});
+        return post("/members", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     public List<MemberPayment> createMemberPayments(String memberId, List<CreateMemberPayment> body) {
-        return post("/members/" + memberId + "/payments", body, new ParameterizedTypeReference<>() {});
+        return post("/members/" + memberId + "/payments", body, new ParameterizedTypeReference<>() {
+        });
     }
 
     // =========================
