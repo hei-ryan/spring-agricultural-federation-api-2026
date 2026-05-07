@@ -7,7 +7,7 @@ public class MemberPayment {
     public String id;
     public Integer amount;
     public PaymentMode paymentMode;
-    //public FinancialAccount accountCredited;
+    public FinancialAccount accountCredited;
     public LocalDate creationDate;
 
     @Override
@@ -16,7 +16,7 @@ public class MemberPayment {
                 "id='" + id + '\'' +
                 ", amount=" + amount +
                 ", paymentMode=" + paymentMode +
-                //", accountCredited=" + accountCredited +
+                ", accountCredited=" + accountCredited +
                 ", creationDate=" + creationDate +
                 '}';
     }

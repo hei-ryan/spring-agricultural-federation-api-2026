@@ -9,7 +9,7 @@ public class CollectivityTransaction {
     public LocalDate creationDate;
     public BigDecimal amount;
     public PaymentMode paymentMode;
-    //public FinancialAccount accountCredited;
+    public FinancialAccount accountCredited;
     public Member memberDebited;
 
     @Override
@@ -19,7 +19,7 @@ public class CollectivityTransaction {
                 ", creationDate=" + creationDate +
                 ", amount=" + amount +
                 ", paymentMode=" + paymentMode +
-                //", accountCredited=" + accountCredited +
+                ", accountCredited=" + accountCredited +
                 ", memberDebited=" + memberDebited +
                 '}';
     }
