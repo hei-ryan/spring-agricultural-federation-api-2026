@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://localhost:8080";
+    private static final String BASE_URL = "http://192.168.0.150:8080";
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
@@ -83,12 +83,12 @@ public class ApiClient {
     }
 
     public List<CollectivityOverallStatistics> getCollectivitiesOverallStatistics(LocalDate from, LocalDate to) {
-        return get("/collectivities/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
+        return get("/collectivites/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
         });
     }
 
     public List<CollectivityActivity> getCollectivityActivities(String id) {
-        return get("/collectivities/" + id + "/activities", new ParameterizedTypeReference<>() {
+        return get("/collectivites/" + id + "/activities", new ParameterizedTypeReference<>() {
         });
     }
 
